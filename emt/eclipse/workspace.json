@@ -1,0 +1,14 @@
+{
+    "type": "com.google.eclipse.mechanic.UriTaskProviderModel",
+    "metadata": {
+        "description": "EMT project configuration",
+        "name": "Maido Käära",
+        "contact": "maido.kaara@nortal.com"
+    },
+    "tasks": [
+        "scripts/formatter.epf",
+        "scripts/saveactions.epf",
+        "scripts/warnings.epf",
+        "scripts/workspace.epf"
+    ]
+}
