@@ -30,7 +30,7 @@
 					//Create new auth request packet
 					var request = new Packet4001();
 					request.setParam("VK_SND_ID","TEST");
-					request.setParam("VK_RETURN","http://v3rm0n.github.com/client-banklink/index.html");
+					request.setParam("VK_RETURN","../index.html");
 					var now = new Date();
 					var d = now.getDate();
 					var m = now.getMonth()+1;
@@ -73,7 +73,7 @@
 			<div class="row-fluid">
 				<div class="span4">&nbsp;</div>
 				<div class="span4">
-					<form id="bankForm" class="form-horizontal" method="POST">
+					<form class="form-horizontal">
 						<fieldset>
 							<legend>Autentimise ja maksmise test</legend>
 							<div class="control-group">
