@@ -1,8 +1,20 @@
 //Predefined bank link packets according to Swedbank specifications
 //Common variables
-var SND_ID = "HP";
+var Swedbank = Swedbank || {};
+Swedbank.SND_ID = "HP";
+Swedbank.SND_ACC = "22101234567";
+Swedbank.SND_NAME = "Maksja Nimi";
+//Authentication variables
+Swedbank.INFO_FORMAT = "ISIK:{0};NIMI:{1} {2}";
+Swedbank.USER="";
+//Payment variables
+Swedbank.REC_ACC = "2212345678";
+Swedbank.REC_NAME = "TEST";
+//Generate VK_T_NO parameter value
+Swedbank.generateVKTNO = function(){
+	return "12345";
+}
 //Authentication services
-var INFO_FORMAT = "ISIK:{0};NIMI:{1} {2}";
 //Authentication request 4001
 Packet4001.prototype = new RequestPacket();
 Packet4001.prototype.constructor = Packet4001;
@@ -25,12 +37,14 @@ function Packet4001(){
 }
 Packet4001.prototype.response = function(firstName, lastName, idCode){
 	var response = new Packet3002();
-	response.setParam("VK_DATE", this.getParam("VK_DATE"));
-	response.setParam("VK_TIME", this.getParam("VK_TIME"));
-	response.setParam("VK_SND_ID", SND_ID);
+	var now = new Date();
+	response.setParam("VK_DATE", now.formatDate());
+	response.setParam("VK_TIME", now.formatTime());
+	response.setParam("VK_SND_ID", Swedbank.SND_ID);
+	response.setParam("VK_USER", Swedbank.USER);
 	response.setParam("VK_LANG", this.getParam("VK_LANG"));
 	response.setParam("VK_ENCODING", this.getParam("VK_ENCODING"));
-	response.setParam("VK_INFO", INFO_FORMAT.format(idCode, firstName, lastName));
+	response.setParam("VK_INFO", Swedbank.INFO_FORMAT.format(idCode, firstName, lastName));
 	response.sign();
 	return response;
 }
@@ -75,12 +89,12 @@ function Packet4002(){
 }
 Packet4002.prototype.response = function(firstName, lastName, idCode){
 	var response = new Packet3003();
-	response.setParam("VK_SND_ID", SND_ID);
+	response.setParam("VK_SND_ID", Swedbank.SND_ID);
 	response.setParam("VK_REC_ID", this.getParam("VK_SND_ID"));
 	response.setParam("VK_NONCE", this.getParam("VK_NONCE"));
 	response.setParam("VK_LANG", this.getParam("VK_LANG"));
 	response.setParam("VK_ENCODING", this.getParam("VK_ENCODING"));
-	response.setParam("VK_INFO", INFO_FORMAT.format(idCode, firstName, lastName));
+	response.setParam("VK_INFO", Swedbank.INFO_FORMAT.format(idCode, firstName, lastName));
 	response.sign();
 	return response;
 }
@@ -131,19 +145,20 @@ function Packet1001(){
 Packet1001.prototype.response = function(success, auto){
 	if(success){
 		var response = new Packet1101();
-		response.setParam("VK_SND_ID", SND_ID);
+		response.setParam("VK_SND_ID", Swedbank.SND_ID);
 		response.setParam("VK_REC_ID", this.getParam("VK_SND_ID"));
 		response.setParam("VK_STAMP", this.getParam("VK_STAMP"));
-		//VK_T_NO
+		response.setParam("VK_T_NO", Swedbank.generateVKTNO());
 		response.setParam("VK_AMOUNT", this.getParam("VK_AMOUNT"));
 		response.setParam("VK_CURR", this.getParam("VK_CURR"));
 		response.setParam("VK_REC_ACC", this.getParam("VK_ACC"));
 		response.setParam("VK_REC_NAME", this.getParam("VK_NAME"));
-		//VK_SND_ACC
-		//VK_SND_NAME
+		response.setParam("VK_SND_ACC", Swedbank.SND_ACC);
+		response.setParam("VK_SND_NAME", Swedbank.SND_NAME);
 		response.setParam("VK_REF", this.getParam("VK_REF"));
 		response.setParam("VK_MSG", this.getParam("VK_MSG"));
-		//VK_T_DATE
+		var now = new Date();
+		response.setParam("VK_T_DATE", now.formatDate());
 		response.setParam("VK_LANG", this.getParam("VK_LANG"));
 		response.setParam("VK_AUTO", auto ? "Y":"N");
 		response.setParam("VK_ENCODING", this.getParam("VK_ENCODING"));
@@ -152,6 +167,15 @@ Packet1001.prototype.response = function(success, auto){
 	}
 	else {
 		var response = new Packet1901();
+		response.setParam("VK_SND_ID", Swedbank.SND_ID);
+		response.setParam("VK_REC_ID", this.getParam("VK_SND_ID"));
+		response.setParam("VK_STAMP", this.getParam("VK_STAMP"));
+		response.setParam("VK_REF", this.getParam("VK_REF"));
+		response.setParam("VK_MSG", this.getParam("VK_MSG"));
+		response.setParam("VK_LANG", this.getParam("VK_LANG"));
+		response.setParam("VK_AUTO", auto ? "Y":"N");
+		response.setParam("VK_ENCODING", this.getParam("VK_ENCODING"));
+		response.sign();
 		return response;
 	}
 }
@@ -176,6 +200,43 @@ function Packet1002(){
 	RequestPacket.call(packetId, parameters);
 	this.packetId = packetId;
 	this.parameters = parameters;
+}
+Packet1002.prototype.response = function(success, auto){
+	if(success){
+		var response = new Packet1101();
+		response.setParam("VK_SND_ID", Swedbank.SND_ID);
+		response.setParam("VK_REC_ID", this.getParam("VK_SND_ID"));
+		response.setParam("VK_STAMP", this.getParam("VK_STAMP"));
+		response.setParam("VK_T_NO", Swedbank.generateVKTNO());
+		response.setParam("VK_AMOUNT", this.getParam("VK_AMOUNT"));
+		response.setParam("VK_CURR", this.getParam("VK_CURR"));
+		response.setParam("VK_REC_ACC", Swedbank.REC_ACC);
+		response.setParam("VK_REC_NAME", Swedbank.REC_NAME);
+		response.setParam("VK_SND_ACC", Swedbank.SND_ACC);
+		response.setParam("VK_SND_NAME", Swedbank.SND_NAME);
+		response.setParam("VK_REF", this.getParam("VK_REF"));
+		response.setParam("VK_MSG", this.getParam("VK_MSG"));
+		var now = new Date();
+		response.setParam("VK_T_DATE", now.formatDate());
+		response.setParam("VK_LANG", this.getParam("VK_LANG"));
+		response.setParam("VK_AUTO", auto ? "Y":"N");
+		response.setParam("VK_ENCODING", this.getParam("VK_ENCODING"));
+		response.sign();
+		return response;
+	}
+	else {
+		var response = new Packet1901();
+		response.setParam("VK_SND_ID", Swedbank.SND_ID);
+		response.setParam("VK_REC_ID", this.getParam("VK_SND_ID"));
+		response.setParam("VK_STAMP", this.getParam("VK_STAMP"));
+		response.setParam("VK_REF", this.getParam("VK_REF"));
+		response.setParam("VK_MSG", this.getParam("VK_MSG"));
+		response.setParam("VK_LANG", this.getParam("VK_LANG"));
+		response.setParam("VK_AUTO", auto ? "Y":"N");
+		response.setParam("VK_ENCODING", this.getParam("VK_ENCODING"));
+		response.sign();
+		return response;
+	}
 }
 //Payment response 1101
 Packet1101.prototype = new RequestPacket();

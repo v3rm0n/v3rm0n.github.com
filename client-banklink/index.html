@@ -3,7 +3,7 @@
 	<head>
 		<title>Pangalingi test</title>
 		<meta charset="UTF-8" />
-		<link type="text/css" rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css"></link>
+		<link type="text/css" rel="stylesheet" href="css/bootstrap-combined.min.css"></link>
 		<script type="text/javascript" src="js/rsasign/jsbn.js"></script>
 		<script type="text/javascript" src="js/rsasign/jsbn2.js"></script>
 		<script type="text/javascript" src="js/rsasign/rsa.js"></script>
@@ -20,8 +20,8 @@
 		<script type="text/javascript" src="js/rsasign/rsasign-1.2.min.js"></script>
 		<script type="text/javascript" src="js/rsasign/asn1hex-1.1.min.js"></script>
 		<script type="text/javascript" src="js/rsasign/x509-1.1.min.js"></script>
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-		<script type="text/javascript" src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="js/scripts.js"></script>
 		<script type="text/javascript" src="js/swed.js"></script>
 		<script type="text/javascript">
@@ -32,14 +32,8 @@
 					request.setParam("VK_SND_ID","TEST");
 					request.setParam("VK_RETURN","../index.html");
 					var now = new Date();
-					var d = now.getDate();
-					var m = now.getMonth()+1;
-					var y = now.getFullYear();
-					request.setParam("VK_DATE",(d<10?"0"+d:d)+"."+(m<10?"0"+m:m)+"."+y);
-					var h = now.getHours();
-					var min = now.getMinutes();
-					var s = now.getSeconds();
-					request.setParam("VK_TIME",(h<10?"0"+h:h)+":"+(min<10?"0"+min:min)+":"+(s<10?"0"+s:s));
+					request.setParam("VK_DATE",now.formatDate());
+					request.setParam("VK_TIME",now.formatTime());
 					$(this).attr("href", "auth/swed.html"+request.queryString()+"USE_GET=Y");
 				});
 				$("#paymentBtn").click(function(){
@@ -56,6 +50,9 @@
 					if(response.verify()){
 						if(response instanceof Packet1101){
 							alert("Makse õnnestus summas "+response.getParam("VK_AMOUNT"));
+						}
+						if(response instanceof Packet1901){
+							alert("Makse ebaõnnestus!");
 						}
 						else{
 							alert("Tere tulemast "+response.getParam("VK_INFO"));

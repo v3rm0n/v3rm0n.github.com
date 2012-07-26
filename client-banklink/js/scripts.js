@@ -10,6 +10,23 @@ String.prototype.format = function() {
     ;
   });
 };
+//Time and date format functions
+//Example new Date().formatDate("{0}.{1}.{2}"); -> "24.07.2012"
+Date.prototype.formatDate = function(format){
+	var format = format || "{0}.{1}.{2}";
+	var d = this.getDate();
+	var m = this.getMonth()+1;
+	var y = this.getFullYear();
+	return format.format((d<10?"0"+d:d),(m<10?"0"+m:m),y);
+}
+//Example new Date().formatTime("{0}:{1}:{2}") -> "12:48:55"
+Date.prototype.formatTime = function(format){
+	var format = format || "{0}:{1}:{2}";
+	var h = this.getHours();
+	var min = this.getMinutes();
+	var s = this.getSeconds();
+	return format.format((h<10?"0"+h:h),(min<10?"0"+min:min),(s<10?"0"+s:s));
+}
 getUrlParams = function(){
 	var urlParams = {};
 	var	match,
@@ -39,10 +56,10 @@ Packet.prototype.setParam = function(paramName, paramValue){
 				param.value = $.trim(paramValue);
 				return;
 			}
-			alert("Parameter "+param.name+" value too long!["+paramValue.length+","+param.length+"]");
+			throw new RangeError("Parameter "+param.name+" value too long!["+paramValue.length+","+param.length+"]");
 		}
 	}
-	alert("Parameter "+paramName+" doesn't exist!");
+	throw new ParameterError("Parameter "+paramName+" doesn't exist!");
 }
 Packet.prototype.getParam = function(paramName){
 	for(i=0;i<this.parameters.length;i++){
@@ -50,7 +67,7 @@ Packet.prototype.getParam = function(paramName){
 			return this.parameters[i].value;
 		}
 	}
-	alert("Parameter "+paramName+" doesn't exist!");
+	throw new ParameterError("Parameter "+paramName+" doesn't exist!");
 }
 Packet.prototype.toMac = function(){
 	function pad(length){
@@ -70,10 +87,10 @@ Packet.prototype.toMac = function(){
 }
 //"Abstract" methods
 Packet.prototype.privateKey = function(){
-	alert("Not implemented!");
+	throw new NotImplementedError("Packet.privateKey");
 }
 Packet.prototype.certificate = function(){
-	alert("Not implemented!");
+	throw new NotImplementedError("Packet.certificate");
 }
 //Sign parameters and return URL
 Packet.prototype.sign = function(){
@@ -141,8 +158,8 @@ RequestPacket.prototype.certificate = function(){
 	return BANK_CERT;
 }
 //"Abstract" functions
-RequestPacket.prototype.response = function(firstName, lastName, idCode){
-	alert("Not implemented!");
+RequestPacket.prototype.response = function(){
+	throw new NotImplementedError("RequestPacket.response");
 }
 //Response packet
 ResponsePacket.prototype = new Packet();
@@ -164,6 +181,67 @@ function PacketParameter(name, length, order, value){
 	this.length = length;
 	this.order = order || 0;
 	this.value = value || "";
+}
+//Errors
+ParameterError.prototype = new Error();
+ParameterError.prototype.constructor = ParameterError;
+function ParameterError(message){
+	Error.call(message);
+	this.message = message;
+}
+NotImplementedError.prototype = new Error();
+NotImplementedError.prototype.constructor = NotImplementedError;
+function NotImplementedError(method){
+	var message = "Method "+method+" not implemented!";
+	Error.call(message);
+	this.message = message;
+//AuthHistory
+function AuthHistory(history){
+	this.history = history || [];
+}
+AuthHistory.prototype.isEmpty = function() {
+	return this.history.length == 0;
+}
+AuthHistory.prototype.contains = function(id) {
+	var found = false;
+	$.each(this.history, function(i,item){
+		if(item.id == id){
+			found = true;
+			return (false);
+		}
+	});
+	return found;
+}
+AuthHistory.prototype.add = function(id, firstName, lastName) {
+	if(!this.contains(id)){
+		this.history.push({id: id, firstName: firstName, lastName: lastName});
+		localStorage.setItem("history", JSON.stringify(this.history));
+	}
+}
+AuthHistory.prototype.get = function(id){
+	var found = null;
+	$.each(this.history, function(i,item){
+		if(item.id == id){
+			found = item;
+			return (false);
+		}
+	});
+	return found;
+}
+AuthHistory.prototype.asSelect = function() {
+	if(this.isEmpty()){
+		return "";
+	}
+	var select = "<select>";
+	$.each(this.history, function(i,item){
+		select += "<option value='"+item.id+"'>"+item.firstName+" "+item.lastName+"</option>"
+	});
+	select += "</select>";
+	return select;
+}
+AuthHistory.init = function(){
+	var history = $.parseJSON(localStorage.getItem("history"));
+	return new AuthHistory(history);
 }
 //Certs and keys
 var MERCHANT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\
