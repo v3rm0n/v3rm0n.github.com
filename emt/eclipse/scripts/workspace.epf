@@ -1,9 +1,0 @@
-# @title Workspace generic configuration
-# @description Initializes workspace
-# @task_type RECONCILE
-#
-file_export_version=3.0
-/instance/org.eclipse.core.resources/encoding=UTF-8
-/instance/org.eclipse.ui.editors/spacesForTabs=true
-/instance/org.eclipse.ui.editors/showWhitespaceCharacters=true
-/instance/org.eclipse.core.runtime/line.separator=\r\n
